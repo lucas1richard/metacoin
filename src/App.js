@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 // import Web3 from 'web3';
 import Button from './components/Button';
+import Input from './components/Input';
 import PageWrapper from './components/PageWrapper';
 import { DLSProvider } from './hooks/useDLS';
 import Token from './abis/Token.json';
@@ -15,6 +16,7 @@ const App = () => {
   const [tokenBalance, setTokenBalance] = useState('');
   const [ethSwapRate, setEthSwapRate] = useState('');
   const [networkId, setNetworkId] = useState('');
+  const [ethToSend, setEthToSend] = useState('');
 
   function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
@@ -95,7 +97,7 @@ const App = () => {
     // this.setState({ loading: true });
     // const { ethSwap, account } = this.state;
     ethSwap.methods.buyTokens()
-      .send({ from: currentAccount, value: web3.utils.toWei('1') })
+      .send({ from: currentAccount, value: web3.utils.toWei(ethToSend) })
       .on('transactionHash', async (hash) => {
         console.log(hash);
         // this.setState({ loading: false })
@@ -140,9 +142,18 @@ const App = () => {
           <Button onClick={connect}>
             Connect Metamask
           </Button>
-          <Button onClick={buyTokens}>
-            Buy Tokens
-          </Button>
+        </div>
+        <div className="mt-4">
+          <label htmlFor="ether-amount" className="text-sm">
+            Ether Amount
+          </label>
+          <div className="flex">
+            <Input id="ether-amount" value={ethToSend} onChange={({ target: { value } }) => setEthToSend(value)} />
+            <Button type="primary" className="ml-2" onClick={buyTokens}>
+              Buy Tokens
+            </Button>
+          </div>
+          Buy {(ethSwapRate * ethToSend) || 0} tokens with {ethToSend || 0} ether
         </div>
       </>
     </PageWrapper>

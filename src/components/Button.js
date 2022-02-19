@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Button = ({ children, type, ...rest }) => {
+const Button = ({
+  children,
+  className,
+  type,
+  ...rest
+}) => {
   let borderColor = 'border-gray-600';
   let bgColor = 'bg-white';
   let textColor = 'text-gray-900;'
@@ -12,7 +17,7 @@ const Button = ({ children, type, ...rest }) => {
   }
   return (
     <button
-      className={`border border-1 border-solid ${borderColor} rounded py-1 px-2 ${bgColor} ${textColor}`}
+      className={`border border-1 border-solid ${borderColor} rounded py-1 px-2 ${bgColor} ${textColor} ${className}`}
       {...rest}
     >
       {children}
@@ -23,6 +28,7 @@ const Button = ({ children, type, ...rest }) => {
 Button.propTypes = {
   children: PropTypes.node,
   type: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default Button;
