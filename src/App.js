@@ -9,14 +9,17 @@ import EthSwap from './abis/EthSwap.json';
 
 let web3;
 let ethSwap;
+let token;
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState(undefined);
   const [ethBalance, setEthBalance] = useState('');
+  const [ethSwapAddress, setEthSwapAddress] = useState('');
   const [tokenBalance, setTokenBalance] = useState('');
   const [ethSwapRate, setEthSwapRate] = useState('');
   const [networkId, setNetworkId] = useState('');
   const [ethToSend, setEthToSend] = useState('');
+  const [tokensToSend, setTokensToSend] = useState('');
 
   function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
@@ -51,8 +54,10 @@ const App = () => {
       if (!tokenData) throw new Error('Token contract not deployed to detected network.');
       if (!ethSwapData) throw new Error('EthSwap contract not deployed to detected network.');
       
-      const token = new web3.eth.Contract(Token.abi, tokenData.address);
+      token = new web3.eth.Contract(Token.abi, tokenData.address);
       ethSwap = new web3.eth.Contract(EthSwap.abi, ethSwapData.address);
+
+      setEthSwapAddress(ethSwapData.address);
 
       // eslint-disable-next-line no-undef
       const [tokenBalanceBuffer, ethSwapRateBuffer] = await Promise.all([
@@ -104,10 +109,22 @@ const App = () => {
       })
   }
 
+  const sellTokens = async () => {
+    token.methods.approve(ethSwapAddress, tokensToSend)
+      .send({ from: currentAccount })
+    ethSwap.methods.sellTokens(tokensToSend).send({ from: currentAccount })
+  }
+
   return (
   <DLSProvider value={{}}>
     <PageWrapper>
       <>
+        <div className="mb-2">
+          <div className="text-gray-900 font-semibold">EthSwap Address:</div>
+          <div className="text-gray-600 text-sm">
+            {ethSwapAddress}
+          </div>
+        </div>
         <div className="mb-2">
           <div className="text-gray-900 font-semibold">Account:</div>
           <div className="text-gray-600 text-sm">
@@ -154,6 +171,18 @@ const App = () => {
             </Button>
           </div>
           Buy {(ethSwapRate * ethToSend) || 0} tokens with {ethToSend || 0} ether
+        </div>
+        <div className="mt-4">
+          <label htmlFor="ether-amount" className="text-sm">
+            Tokens Amount
+          </label>
+          <div className="flex">
+            <Input id="ether-amount" value={tokensToSend} onChange={({ target: { value } }) => setTokensToSend(value)} />
+            <Button type="primary" className="ml-2" onClick={sellTokens}>
+              Sell Tokens
+            </Button>
+          </div>
+          Sell {tokensToSend || 0} tokens for {tokensToSend/ethSwapRate} ether
         </div>
       </>
     </PageWrapper>
